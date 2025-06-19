@@ -1,0 +1,151 @@
+CREATE TABLE Customers (
+       CustomerID INT PRIMARY KEY AUTO_INCREMENT,
+       FirstName VARCHAR(50),
+       LastName VARCHAR(50),
+       Email VARCHAR(100),
+       Phone VARCHAR(20),
+       Address TEXT,
+       CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE Genres (
+       GenreID INT PRIMARY KEY AUTO_INCREMENT,
+       GenreName VARCHAR(50)
+);
+
+CREATE TABLE Movies (
+       MovieID INT PRIMARY KEY AUTO_INCREMENT,
+       Title VARCHAR(100),
+       Description TEXT,
+       ReleaseYear YEAR,
+       GenreID INT,
+       Rating VARCHAR(10),
+       Status ENUM('Available', 'Rented', 'Inactive') DEFAULT 'Available',
+       FOREIGN KEY (GenreID) REFERENCES Genres(GenreID)
+);
+
+CREATE TABLE Inventory (
+       InventoryID INT PRIMARY KEY AUTO_INCREMENT,
+       MovieID INT,
+       StoreLocation VARCHAR(100),
+       Stock INT,
+       FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
+);
+
+CREATE TABLE Staff (
+       StaffID INT PRIMARY KEY AUTO_INCREMENT,
+       FullName VARCHAR(100),
+       Role ENUM('Admin', 'Clerk'),
+       Username VARCHAR(50),
+       PasswordHash VARCHAR(255)
+);
+
+CREATE TABLE Rentals (
+       RentalID INT PRIMARY KEY AUTO_INCREMENT,
+       InventoryID INT,
+       CustomerID INT,
+       StaffID INT,
+       RentalDate DATETIME,
+       DueDate DATETIME,
+       ReturnDate DATETIME,
+       Status ENUM('Rented', 'Returned', 'Late') DEFAULT 'Rented',
+       FOREIGN KEY (InventoryID) REFERENCES Inventory(InventoryID),
+       FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+       FOREIGN KEY (StaffID) REFERENCES Staff(StaffID)
+);
+
+CREATE TABLE Payments (
+       PaymentID INT PRIMARY KEY AUTO_INCREMENT,
+       RentalID INT,
+       Amount DECIMAL(6,2),
+       PaymentDate DATETIME,
+       PaymentMethod VARCHAR(30),
+       FOREIGN KEY (RentalID) REFERENCES Rentals(RentalID)
+);
+
+
+CREATE TABLE Feedback (
+       FeedbackID INT PRIMARY KEY AUTO_INCREMENT,
+       CustomerID INT,
+       MovieID INT,
+       Rating INT CHECK(Rating BETWEEN 1 AND 5),
+       Comment TEXT,
+       CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+       FOREIGN KEY (CustomerID) REFERENCES Customers(CustomerID),
+       FOREIGN KEY (MovieID) REFERENCES Movies(MovieID)
+);
+
+-- Genres
+INSERT INTO Genres(GenreName)
+            VALUES('Action');
+INSERT INTO Genres(GenreName)
+            VALUES('Comedy');
+INSERT INTO Genres(GenreName)
+            VALUES('Drama');
+INSERT INTO Genres(GenreName)
+            VALUES('Horror');
+INSERT INTO Genres(GenreName)
+            VALUES('Sci-Fi');
+
+-- Movies
+INSERT INTO Movies(Title, Description, ReleaseYear, GenreID, Rating, Status)
+            VALUES('The Last Mission', 'Action-packed thriller', 2020, 1, 'PG-13', 'Available');
+INSERT INTO Movies(Title, Description, ReleaseYear, GenreID, Rating, Status)
+            VALUES('Laugh Till You Drop', 'Comedy chaos ensues', 2019, 2, 'PG', 'Available');
+INSERT INTO Movies(Title, Description, ReleaseYear, GenreID, Rating, Status)
+            VALUES('Dark Days', 'Emotional drama about loss', 2021, 3, 'R', 'Available');
+INSERT INTO Movies(Title, Description, ReleaseYear, GenreID, Rating, Status)
+            VALUES('Nightmare Alley', 'Terrifying psychological horror', 2022, 4, 'R', 'Available');
+INSERT INTO Movies(Title, Description, ReleaseYear, GenreID, Rating, Status)
+            VALUES('Galaxy Wars', 'Sci-fi space battle', 2023, 5, 'PG-13', 'Available');
+
+-- Customers
+INSERT INTO Customers(FirstName, LastName, Email, Phone, Address)
+            VALUES('John', 'Doe', 'john.doe@example.com', '1234567890', '123 Main St');
+INSERT INTO Customers(FirstName, LastName, Email, Phone, Address)
+            VALUES('Alice', 'Smith', 'alice.smith@example.com', '2345678901', '456 Oak Ave');
+INSERT INTO Customers(FirstName, LastName, Email, Phone, Address)
+            VALUES('Bob', 'Johnson', 'bob.j@example.com', '3456789012', '789 Pine Rd');
+
+-- Staff
+INSERT INTO Staff(FullName, Role, Username, PasswordHash)
+            VALUES('Admin User', 'Admin', 'admin1', 'hash_admin');
+INSERT INTO Staff(FullName, Role, Username, PasswordHash)
+            VALUES('Jane Clerk', 'Clerk', 'jane_clerk', 'hash_clerk');
+
+-- Inventory
+INSERT INTO Inventory(MovieID, StoreLocation, Stock)
+            VALUES(1, 'Downtown', 5);
+INSERT INTO Inventory(MovieID, StoreLocation, Stock)
+            VALUES(2, 'Downtown', 3);
+INSERT INTO Inventory(MovieID, StoreLocation, Stock)
+            VALUES(3, 'Uptown', 4);
+INSERT INTO Inventory(MovieID, StoreLocation, Stock)
+            VALUES(4, 'Uptown', 2);
+INSERT INTO Inventory(MovieID, StoreLocation, Stock)
+            VALUES(5, 'Downtown', 6);
+
+-- Rentals
+INSERT INTO Rentals(InventoryID, CustomerID, StaffID, RentalDate, DueDate, ReturnDate, Status)
+            VALUES(1, 1, 2, '2025-06-01 10:00:00', '2025-06-08', NULL, 'Rented');
+INSERT INTO Rentals(InventoryID, CustomerID, StaffID, RentalDate, DueDate, ReturnDate, Status)
+            VALUES(3, 2, 2, '2025-06-02 11:00:00', '2025-06-09', '2025-06-08', 'Returned');
+INSERT INTO Rentals(InventoryID, CustomerID, StaffID, RentalDate, DueDate, ReturnDate, Status)
+            VALUES(2, 3, 2, '2025-05-20 14:00:00', '2025-05-27', NULL, 'Late');
+
+-- Payments
+INSERT INTO Payments(RentalID, Amount, PaymentDate, PaymentMethod)
+            VALUES(1, 4.99, '2025-06-01 10:05:00', 'Credit Card');
+INSERT INTO Payments(RentalID, Amount, PaymentDate, PaymentMethod)
+            VALUES(2, 3.99, '2025-06-02 11:10:00', 'Cash');
+INSERT INTO Payments(RentalID, Amount, PaymentDate, PaymentMethod)
+            VALUES(3, 6.99, '2025-05-20 14:10:00', 'Debit');
+
+-- Feedback
+INSERT INTO Feedback(CustomerID, MovieID, Rating, Comment)
+            VALUES(1, 1, 5, 'Amazing! Non-stop action.');
+INSERT INTO Feedback(CustomerID, MovieID, Rating, Comment)
+            VALUES(2, 3, 4, 'Beautifully made, emotionally deep.');
+INSERT INTO Feedback(CustomerID, MovieID, Rating, Comment)
+            VALUES(3, 5, 3, 'Good effects but weak plot.');
+
